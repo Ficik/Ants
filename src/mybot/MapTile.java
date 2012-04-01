@@ -48,7 +48,7 @@ public class MapTile extends Tile {
 		return row * Ants.MAX_MAP_SIZE + col;
 	}
 
-	private boolean isVisible() {
+	public boolean isVisible() {
 		return GameState.getCore().isVisible(this);
 	}
 

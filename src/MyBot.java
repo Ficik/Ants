@@ -15,6 +15,7 @@ import mybot.GameState;
 import mybot.Map;
 import mybot.MapTile;
 import mybot.algo.AStar;
+import mybot.algo.PotentialFields;
 
 import core.Ants;
 import core.Bot;
@@ -143,5 +144,6 @@ public class MyBot extends Bot {
 	@Override
 	public void addWater(int row, int col) {
 		GameState.getMap().getTile(row, col).setValue(Ilk.WATER);
+		PotentialFields.generatePotentialFromTile(row, col);
 	}
 }

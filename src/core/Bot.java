@@ -1,3 +1,4 @@
+package core;
 /**
  * Provides basic game state handling.
  */

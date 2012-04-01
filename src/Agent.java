@@ -4,6 +4,13 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Random;
 
+import mybot.Map;
+import mybot.MapTile;
+
+import core.Aim;
+import core.Ants;
+
+
 public class Agent extends Target {
 
 	public static Ants ants;

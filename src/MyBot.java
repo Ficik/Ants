@@ -1,3 +1,5 @@
+
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.FileHandler;
@@ -6,41 +8,43 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+import mybot.Ant;
+import mybot.Food;
+import mybot.GameLogger;
+import mybot.GameState;
+import mybot.Map;
+import mybot.MapTile;
+import mybot.algo.AStar;
+
+import core.Ants;
+import core.Bot;
+import core.Ilk;
+import core.Tile;
+
 /**
  * Starter bot implementation.
  */
 public class MyBot extends Bot {
 
-	Map map;
-	static Logger log;
-	static int round = 0;
+	public static final int MY_BOT = 0;
+	
+	private GameState state = new GameState();
+	
 
-	/**
-	 * Main method executed by the game engine for starting the bot.
-	 * 
-	 * @param args
-	 *            command line arguments
-	 * @throws IOException
-	 *             if an I/O error occurs
-	 */
+	
 	public static void main(String[] args) throws IOException {
-		log = Logger.getLogger("ANTS");
-		//Handler handler = new FileHandler("../Ants.log", false);
-		//handler.setFormatter(new SimpleFormatter());
-		//log.addHandler(handler);
-		log.setLevel(Level.OFF);
-		log.info("========== Starting bot ==========");
-
-		MyBot b = new MyBot();
-		b.readSystemInput();
-		b.prepare();
+		MyBot bot = new MyBot();
+		bot.readSystemInput();
+		bot.prepare();
 	}
+	
 
 	public void prepare() {
-		map = new Map(getAnts());
-		Agent.ants = getAnts();
-		Astar.ants = getAnts();
-		Astar.map = map;
+		GameState.setCore(getAnts());
+		new Map();
+		
+		
+
 		Agent.generateViewDiffs();
 		Agent.generatedAttackDeltas();
 	}
@@ -48,18 +52,33 @@ public class MyBot extends Bot {
 	@SuppressWarnings("unchecked")
 	@Override
 	public void doTurn() {
-		if (round == 0)
-			prepare();
+		state.prepareNewRound();
+		
+		for (Tile hill : getAnts().getEnemyHills()){
+			MapTile closest = AStar.antSearch(GameState.getMap().getTile(hill.getRow(), hill.getCol()));
+			if (isValidTileWithAnt(closest))
+				closest.getAnt().assignHill(hill);
+		}
+		
+		for (Food food : Food.known) {
+			MapTile closest = AStar.antSearch(food.getMapTile());
+			if (isValidTileWithAnt(closest))
+				closest.getAnt().assignFoodIfBetter(food);
+		}
+		
+		Ant.scheduleMoves();
+		Ant.performMoves();
+		
+		
+		
+		
+		
+
+
 
 		
-		log.info("========== Starting new round ("+round+") ==========");
-		round += 1;
-		Ants ants = getAnts();
-		map.generateInfluence();
-		refreshMap();
-		Food.checkFood(ants.getFoodTiles());
-		//log.info("\n"+map.toString());
-
+	/*	
+	 * map.generateInfluence();
 		ArrayList<MapTile> agent_positions = Agent.getPositions();
 		for (Tile hill : getAnts().getEnemyHills()){
 			Astar astar = new Astar(map.getMapTile(hill),
@@ -69,13 +88,7 @@ public class MyBot extends Bot {
 				Agent agent = (Agent) closest.contains.get(Target.MY_ANT);
 				agent.assigned_hill = map.getMapTile(hill);
 			}
-			
-		}
-		
-		for (Food food : Food.known) {
-			Astar astar = new Astar(food.position,
-					(ArrayList<MapTile>) agent_positions.clone());
-			MapTile closest = astar.next();
+				
 			if (closest != null) {
 				Agent agent = (Agent) closest.contains.get(Target.MY_ANT);
 				if (agent.assigned_food != null &&
@@ -94,59 +107,41 @@ public class MyBot extends Bot {
 				food.assigned_agent = agent;
 				agent.assigned_food = food;
 			}
-		}
-
-		for (Agent ant : Agent.mine) {
-			ant.scheduleMove();
-		}
-		for (Agent ant : Agent.mine) {
-			ant.performMove();
-		}
+		}*/
 	}
-
-	private void refreshMap() {
-		Ants ants = getAnts();
-		for (int row = 0; row < ants.getRows(); row++) {
-			for (int col = 0; col < ants.getCols(); col++) {
-				MapTile tile = map.getMapTile(row, col);
-				if (ants.isVisible(tile)) {
-					tile.last_seen = round;
-					if (tile.value == Ilk.UNKNOWN
-							&& ants.getIlk(tile).isPassable())
-						tile.value = Ilk.LAND;
-				}
-			}
-		}
+	
+	
+	private boolean isValidTileWithAnt(MapTile maptile){
+		return maptile != null && maptile.getAnt() != null;
 	}
+	
+	
+	/* *********** *
+	 *  LISTENERS  *
+	 * *********** */
 
 	@Override
 	public void addFood(int row, int col) {
-		new Food(map.getMapTile(row, col));
+		new Food(map.getTile(row, col));
 		super.addFood(row, col);
-	}
-
-	public static int getRound() {
-		return round;
 	}
 	
 	@Override
 	public void addAnt(int row, int col, int owner) {
-		if (owner == 0) {
-			Agent.updateAgent(row, col);
-		}
+		if (owner == MY_BOT)
+			Ant.addAnt(row,col);
 		super.addAnt(row, col, owner);
 	}
 
 	@Override
 	public void removeAnt(int row, int col, int owner) {
-		if (owner == 0) {
-			Agent.removeAgent(row, col);
-		}
+		if (owner == MY_BOT) 
+			Ant.removeAnt(row, col);
 		super.removeAnt(row, col, owner);
 	}
 
 	@Override
 	public void addWater(int row, int col) {
-		map.update(Ilk.WATER, row, col);
+		GameState.getMap().getTile(row, col).setValue(Ilk.WATER);
 	}
 }

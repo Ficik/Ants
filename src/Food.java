@@ -1,6 +1,11 @@
 import java.util.ArrayList;
 import java.util.Set;
 
+import mybot.MapTile;
+
+import core.Tile;
+
+
 
 public class Food extends Target {
 

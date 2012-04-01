@@ -139,7 +139,11 @@ public class MapTile extends Tile {
 
 	public int getRealDistance(MapTile start) {
 		Integer distance = realDistances.get(start);
-		return (distance == null) ? UNSET : distance.intValue();
+		if (distance == null)
+			distance = start.realDistances.get(this);
+		if (distance == null) 
+			return UNSET;
+		return distance.intValue();
 	}
 
 	public void setRealDistance(MapTile destination, int distance) {

@@ -8,39 +8,55 @@ import java.util.logging.SimpleFormatter;
 
 
 
-public class GameLogger extends Logger {
+public class GameLogger {
 
-	private final static String LOGGER_DOMAIN = "eu.fisoft.aichallenge.ants";
 	private final static String LOGGER_NAME = "Ants";
-	private final static String LOG_DIR = "logs";
+	private final static String LOG_DIR = "../log";
+	private Logger logger;
 	
-	
-	protected GameLogger() {
-		super(LOGGER_DOMAIN, LOGGER_NAME);
+	public GameLogger() {
+		logger = Logger.getLogger(LOGGER_NAME);
 		startLoggingToFile();
+		logger.setLevel(Level.ALL);
 	}
 	
 	public String getRoundChanges(){
 		String log = getRoundHeader();
-		// TODO: log deads/new food/ants
+		log += "Ants: "+Ant.getAnts().size()+" Food: "+Food.getFood().size();
 		return log;
 	}
 	
 	public String getRoundHeader(){
-		return "===== Round #"+GameState.getInstance().getRound()+" =====";
+		return "===== Round #"+GameState.getRound()+" =====\n";
 	}
 
 	public void logRoundChanges() {
-		log(Level.INFO, getRoundChanges());
+		logger.info(getRoundChanges());
+		logAnts();
+		logMap();
+	}
+	
+	public void logAnts(){
+		String log = "";
+		for (Ant ant : Ant.getAnts()){
+			log+=ant+"\n";
+		}
+		logger.info("Ants status:\n"+log);
+	}
+	
+	public void logMap(){
+		logger.info("Map:\n"+GameState.getMap().toString()+"\n");
 	}
 	
 	public void startLoggingToFile(){
 		try {
 			Handler handler = new FileHandler(LOG_DIR+"/Ants.log", false);
 			handler.setFormatter(new SimpleFormatter());
-			addHandler(handler);
+			logger.setUseParentHandlers(false);
+			logger.addHandler(handler);
+			
 		} catch (Exception e) {
-			log(Level.SEVERE,"Logging to file not started: "+e.getMessage());
+			logger.severe("Logging to file not started: "+e.getMessage());
 		}
 	}
 

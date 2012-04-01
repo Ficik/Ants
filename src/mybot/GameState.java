@@ -6,7 +6,7 @@ import core.Ants;
 public class GameState {
 
 	private static GameState instance;
-	private int round = 0;
+	private static int round = 0;
 	private static Map map;
 	private static Ants core;
 	private boolean logging = true;
@@ -27,7 +27,7 @@ public class GameState {
 	}
 	
 	public static Map getMap() {
-		return map;
+		return GameState.map;
 	}
 	
 	public static void setCore(Ants core) {
@@ -35,7 +35,7 @@ public class GameState {
 	}
 	
 	public static Ants getCore() {
-		return core;
+		return GameState.core;
 	}
 	
 	/* ************************ */
@@ -43,14 +43,14 @@ public class GameState {
 	/* ************************ */
 	
 	
-	public int getRound() {
+	public static int getRound() {
 		return round;
 	}
 	
 	public void prepareNewRound(){
 		round += 1;
 		logRoundChanges();
-		map.updateWholeMap();
+		GameState.map.updateWholeMap();
 	}
 	
 	public boolean isLogging() {

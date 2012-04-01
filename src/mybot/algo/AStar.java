@@ -36,7 +36,7 @@ public class AStar {
 	private AStar(MapTile start, List<? extends Goal> goals) {
 		this.start = start;
 		this.goals = goals;
-		openSet.addAll(start.getPassableNeighbours());
+		openSet.add(start);
 	}
 	
 	
@@ -51,15 +51,18 @@ public class AStar {
 	}
 
 	public MapTile search() {
+		int tilesProcessed = 0;
 		if (!goals.isEmpty())
 			while (!openSet.isEmpty()) {
 				MapTile processed = openSet.poll();
 				if (checkIfGoal(processed))
 					return processed;
+				tilesProcessed += 1;
 				closedSet.add(processed);
 				int curDistance = processed.getRealDistance(start);
-				if (curDistance > DISTANCE_CUTOFF)
+				if (curDistance > DISTANCE_CUTOFF){
 					break;
+				}
 				for (MapTile tile : processed.getPassableNeighbours())
 					tryAddToOpenList(tile, curDistance + 1);
 			}
@@ -77,7 +80,7 @@ public class AStar {
 	
 	private int f(MapTile maptile) {
 		Integer value = fCache.get(maptile);
-		if (value != null) {
+		if (value == null) {
 			value = g(maptile) + minH(maptile);
 			fCache.put(maptile, value);
 		}

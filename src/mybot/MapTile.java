@@ -13,7 +13,7 @@ public class MapTile extends Tile {
 
 	private Ilk value = Ilk.UNKNOWN;
 	private int lastSeen = 0;
-	public static final int UNSET = -1;
+	public static final int UNSET = Integer.MAX_VALUE;
 
 	private HashMap<MapTile, Integer> realDistances = new HashMap<MapTile, Integer>();
 	private float potential = 1;
@@ -27,8 +27,9 @@ public class MapTile extends Tile {
 
 	public void updateState() {
 		if (isVisible()) {
-			setValue(GameState.getCore().getIlk(this));
-			lastSeen = GameState.getInstance().getRound();
+			if (value.equals(Ilk.UNKNOWN))
+				setValue(GameState.getCore().getIlk(this));
+			lastSeen = GameState.getRound();
 		}
 	}
 
@@ -41,7 +42,7 @@ public class MapTile extends Tile {
 	}
 
 	public int getUnseenDuration() {
-		return GameState.getInstance().getRound() - lastSeen;
+		return GameState.getRound() - lastSeen;
 	}
 
 	public static int CalculateHash(int row, int col) {
@@ -76,9 +77,6 @@ public class MapTile extends Tile {
 	public MapTile getNeighbour(Aim aim) {
 		int row = getRow() + aim.getRowDelta();
 		int col = getCol() + aim.getColDelta();
-		col = (col >= Map.cols) ? 0 : (col < 0) ? Map.cols - 1 : col; // it's
-																		// col%cols
-		row = (row >= Map.rows) ? 0 : (row < 0) ? Map.rows - 1 : row;
 		return GameState.getMap().getTile(row, col);
 	}
 
@@ -138,6 +136,7 @@ public class MapTile extends Tile {
 	}
 
 	public int getRealDistance(MapTile start) {
+		if (start.equals(this)) return 0;
 		Integer distance = realDistances.get(start);
 		if (distance == null)
 			distance = start.realDistances.get(this);
@@ -153,5 +152,23 @@ public class MapTile extends Tile {
 	
 	public static boolean isValidTileWithAnt(MapTile maptile){
 		return maptile != null && maptile.getAnt() != null;
+	}
+	
+	public String getValueCode(){
+		if (containFood()) 			return "f";
+		if (isOccupied()) 			return "a";
+		if (value == Ilk.WATER) 	return "x";
+		if (value == Ilk.LAND)		return " ";
+		return "#";
+	}
+	
+	@Override
+	public String toString() {
+		return "Tile ["+getRow()+", "+getCol()+"]";
+	}
+	
+	
+	public Tile createTile(){
+		return new Tile(getRow(),getCol());
 	}
 }

@@ -1,6 +1,9 @@
 package mybot;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import mybot.algo.Goal;
 import core.Aim;
@@ -43,7 +46,7 @@ public class Ant implements Goal {
 	/* === Single ant specific part === */
 	
 	private MapTile maptile = null;
-	private ArrayList<MapTile> scheduledMoves = new ArrayList<MapTile>();
+	private List<MapTile> scheduledMoves = new ArrayList<MapTile>();
 	private Target assignedTarget;
 	
 	
@@ -54,13 +57,22 @@ public class Ant implements Goal {
 	
 	public void scheduleMove(){
 		scheduledMoves.clear();
-		scheduleMoveForFood();
+		if (hasAssignedTarget())
+			scheduleMoveToTarget();
 		scheduleMoveToFight();
 		scheduleMoveToDiscover();
 	}
 
-	private void scheduleMoveForFood(){
-		
+	private void scheduleMoveToTarget(){
+		scheduledMoves = maptile.getPassableNeighbours();
+		System.err.println("Scheduled moves "+scheduledMoves);
+		Collections.sort(scheduledMoves, new Comparator<MapTile>() {
+			@Override
+			public int compare(MapTile o1, MapTile o2) {
+				return ((Integer)((int)(o1.getRealDistance(assignedTarget.getMapTile()))))
+						.compareTo((int)(o2.getRealDistance(assignedTarget.getMapTile())));
+			}
+		});
 	}
 	
 	private void scheduleMoveToFight(){
@@ -123,7 +135,7 @@ public class Ant implements Goal {
 	}
 	
 	public boolean hasAssignedTarget(){
-		return (assignedTarget != null);
+		return (assignedTarget != null && assignedTarget.targetExists());
 	}
 	
 	private boolean isNewTargetIsBetter(Target target){
@@ -138,6 +150,11 @@ public class Ant implements Goal {
 			assignedTarget.unassign();
 		assignedTarget = target;
 		assignedTarget.assign();
+	}
+	
+	@Override
+	public String toString() {
+		return "Ant at "+maptile+": Target: "+assignedTarget ;
 	}
 	
 }

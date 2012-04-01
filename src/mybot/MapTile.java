@@ -13,11 +13,13 @@ public class MapTile extends Tile {
 
 	private Ilk value = Ilk.UNKNOWN;
 	private int lastSeen = 0;
-	private Ant ant;
 	public static final int UNSET = -1;
 
 	private HashMap<MapTile, Integer> realDistances = new HashMap<MapTile, Integer>();
 	private float potential = 1;
+	
+	private Ant ant;
+	private Food food;
 
 	public MapTile(int row, int col) {
 		super(row, col);
@@ -95,6 +97,24 @@ public class MapTile extends Tile {
 	public boolean isOccupied() {
 		return ant != null;
 	}
+	
+	
+	public boolean containFood(){
+		return food != null;
+	}
+	
+	public void setFood(Food food) {
+		this.food = food;
+	}
+	
+	public void unsetFood() {
+		setFood(null);
+	}
+	
+	public Food getFood() {
+		return food;
+	}
+	
 
 	public float getPotential() {
 		return potential;

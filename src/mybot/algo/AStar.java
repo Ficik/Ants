@@ -44,7 +44,7 @@ public class AStar {
 
 	private boolean checkIfGoal(MapTile tile) {
 		for (Goal goal : goals) {
-			if (goal.getMaptile().equals(tile))
+			if (goal.getMapTile().equals(tile))
 				return true;
 		}
 		return false;
@@ -100,7 +100,7 @@ public class AStar {
 		int best = Integer.MAX_VALUE;
 		Iterator<? extends Goal> iterator = goals.iterator();
 		while(iterator.hasNext())
-			best = Math.min(h(pos, iterator.next().getMaptile()), best);
+			best = Math.min(h(pos, iterator.next().getMapTile()), best);
 		return best;
 	}
 

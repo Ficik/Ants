@@ -4,5 +4,5 @@ import mybot.MapTile;
 
 public interface Goal {
 	
-	public MapTile getMaptile();
+	public MapTile getMapTile();
 }

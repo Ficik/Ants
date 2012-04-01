@@ -3,6 +3,7 @@ package mybot;
 import java.util.ArrayList;
 import java.util.List;
 
+import mybot.algo.AStar;
 import mybot.algo.Goal;
 
 public class Food extends Target implements Goal {
@@ -18,10 +19,20 @@ public class Food extends Target implements Goal {
 	public static void removeFood(int row, int col) {
 		GameState.getMap().getTile(row, col).getFood().destroy();
 	}
-	
-	public static void checkAndRemoveLostFood(){
-		for(Food the_food : food)
+
+	public static void checkAndRemoveLostFood() {
+		for (Food the_food : food)
 			the_food.checkAndSolveExistance();
+	}
+
+	public static List<Food> getFood() {
+		return food;
+	}
+
+	public static void tryAssignFood() {
+		for (Food the_food : food)
+			if (!the_food.isAssigned())
+				the_food.tryToAssignToClosestAnt();
 	}
 
 	/* ===== Food Instance ====== */
@@ -34,13 +45,15 @@ public class Food extends Target implements Goal {
 		food.add(this);
 	}
 
-	private void destroy() {
+	@Override
+	protected void destroy() {
 		maptile.unsetFood();
 		food.remove(this);
+		super.destroy();
 	}
 
 	@Override
-	public MapTile getMaptile() {
+	public MapTile getMapTile() {
 		return maptile;
 	}
 
@@ -48,6 +61,12 @@ public class Food extends Target implements Goal {
 		if (maptile.isVisible()
 				&& !GameState.getCore().getFoodTiles().contains(maptile))
 			destroy();
+	}
+
+	public void tryToAssignToClosestAnt() {
+		MapTile closest = AStar.antSearch(maptile);
+		if (MapTile.isValidTileWithAnt(closest))
+			closest.getAnt().assignTargetIfBetter(this);
 	}
 
 }

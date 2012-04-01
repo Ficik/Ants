@@ -1,8 +1,11 @@
 package mybot;
 
-public class Target {
+import mybot.algo.Goal;
+
+abstract public class Target implements Goal {
 
 	private int assignees = 0;
+	private boolean exists = true;
 	
 	public boolean isAssigned(){
 		return assignees>0;
@@ -17,4 +20,18 @@ public class Target {
 			assignees -=1;
 	}
 	
+	public boolean targetExists(){
+		return exists;
+	}
+	
+	protected void destroy(){
+		exists = false;
+	}
+
+	@Override
+	abstract public MapTile getMapTile();
+	
+	public int getRealDistance(MapTile maptile){
+		return maptile.getRealDistance(getMapTile());
+	}
 }

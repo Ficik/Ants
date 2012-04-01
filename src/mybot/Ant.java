@@ -44,6 +44,8 @@ public class Ant implements Goal {
 	
 	private MapTile maptile = null;
 	private ArrayList<MapTile> scheduledMoves = new ArrayList<MapTile>();
+	private Target assignedTarget;
+	
 	
 	private Ant(int row, int col) {
 		setPosition(row, col);
@@ -111,8 +113,31 @@ public class Ant implements Goal {
 	}
 
 	@Override
-	public MapTile getMaptile() {
+	public MapTile getMapTile() {
 		return maptile;
+	}
+
+	public void assignTargetIfBetter(Target target) {
+		if (isNewTargetIsBetter(target))
+			assignTarget(target);
+	}
+	
+	public boolean hasAssignedTarget(){
+		return (assignedTarget != null);
+	}
+	
+	private boolean isNewTargetIsBetter(Target target){
+		if (!hasAssignedTarget()) return true;
+		int newDistance = target.getRealDistance(maptile);
+		int oldDistance = assignedTarget.getRealDistance(maptile);
+		return (newDistance != MapTile.UNSET && newDistance < oldDistance);
+	}
+	
+	private void assignTarget(Target target){
+		if (hasAssignedTarget())
+			assignedTarget.unassign();
+		assignedTarget = target;
+		assignedTarget.assign();
 	}
 	
 }

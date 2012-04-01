@@ -146,4 +146,8 @@ public class MapTile extends Tile {
 		realDistances.put(destination, distance);
 	}
 
+	
+	public static boolean isValidTileWithAnt(MapTile maptile){
+		return maptile != null && maptile.getAnt() != null;
+	}
 }

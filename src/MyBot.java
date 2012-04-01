@@ -61,11 +61,7 @@ public class MyBot extends Bot {
 				closest.getAnt().assignHill(hill);
 		}
 		
-		for (Food food : Food.known) {
-			MapTile closest = AStar.antSearch(food.getMapTile());
-			if (isValidTileWithAnt(closest))
-				closest.getAnt().assignFoodIfBetter(food);
-		}
+		Food.tryAssignFood();
 		
 		Ant.scheduleMoves();
 		Ant.performMoves();
@@ -112,9 +108,7 @@ public class MyBot extends Bot {
 	}
 	
 	
-	private boolean isValidTileWithAnt(MapTile maptile){
-		return maptile != null && maptile.getAnt() != null;
-	}
+	
 	
 	
 	/* *********** *
@@ -123,7 +117,7 @@ public class MyBot extends Bot {
 
 	@Override
 	public void addFood(int row, int col) {
-		new Food(map.getTile(row, col));
+		Food.addFood(row, col);
 		super.addFood(row, col);
 	}
 	

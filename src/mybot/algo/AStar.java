@@ -1,5 +1,6 @@
 package mybot.algo;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -14,22 +15,16 @@ import mybot.MapTile;
 public class AStar {
 
 	
-	private static final int DISTANCE_CUTOFF = 15;
+	private static final int DISTANCE_CUTOFF = 10;
 	private Set<MapTile> closedSet = new HashSet<MapTile>();
 	private MapTile start;
 	private List<? extends Goal> goals;
-
-	private PriorityQueue<MapTile> openSet = new PriorityQueue<MapTile>(80,
-			new Comparator<MapTile>() {
-				@Override
-				public int compare(MapTile o1, MapTile o2) {
-					return ((Integer) f(o1)).compareTo((Integer) f(o2));
-				}
-			});
-
+	private List<MapTile> closedTiles = new ArrayList<MapTile>();
+	private PriorityQueue<MapTile> openSet = new PriorityQueue<MapTile>(80,new FValueComparator());
+	private boolean cutoffFlag = false;
 	
-	public static MapTile antSearch(MapTile start){
-		return (new AStar(start, Ant.getAnts())).search();
+	public static Iterator<MapTile> antSearch(MapTile start){
+		return (new AStar(start, Ant.getAnts())).getIterator();
 	}
 	
 	
@@ -38,9 +33,6 @@ public class AStar {
 		this.goals = goals;
 		openSet.add(start);
 	}
-	
-	
-	
 
 	private boolean checkIfGoal(MapTile tile) {
 		for (Goal goal : goals) {
@@ -49,18 +41,30 @@ public class AStar {
 		}
 		return false;
 	}
+	
+	private void recalculateOpenListPriority(){
+		PriorityQueue<MapTile> newOpenSet = new PriorityQueue<MapTile>(80,new FValueComparator());
+		while (!openSet.isEmpty()){
+			newOpenSet.add(openSet.poll());
+		}
+		openSet = newOpenSet;
+	}
+	
+	public Iterator<MapTile> getIterator(){
+		return new AStarIterator(this);
+	}
 
-	public MapTile search() {
-		int tilesProcessed = 0;
-		if (!goals.isEmpty())
+	private MapTile search() {
 			while (!openSet.isEmpty()) {
 				MapTile processed = openSet.poll();
-				if (checkIfGoal(processed))
-					return processed;
-				tilesProcessed += 1;
 				closedSet.add(processed);
+				if (checkIfGoal(processed)){
+					closedTiles.add(processed);
+					return processed;
+				}
 				int curDistance = processed.getRealDistance(start);
 				if (curDistance > DISTANCE_CUTOFF){
+					cutoffFlag = true;
 					break;
 				}
 				for (MapTile tile : processed.getPassableNeighbours())
@@ -102,9 +106,49 @@ public class AStar {
 	private int minH(MapTile pos){
 		int best = Integer.MAX_VALUE;
 		Iterator<? extends Goal> iterator = goals.iterator();
-		while(iterator.hasNext())
-			best = Math.min(h(pos, iterator.next().getMapTile()), best);
+		while(iterator.hasNext()){
+			MapTile goal = iterator.next().getMapTile();
+			if (closedTiles.contains(goal)) continue;
+			best = Math.min(h(pos, goal), best);
+		}
 		return best;
 	}
+	
+	
+	public boolean isCutoffed() {
+		return cutoffFlag;
+	}
+	
+	class AStarIterator implements Iterator<MapTile> {
 
+		private AStar algo;
+		
+		public AStarIterator(AStar algo) {
+			this.algo = algo;
+		}
+		
+		@Override
+		public boolean hasNext() {
+			return (goals.size()-closedTiles.size()) > 0 && !algo.isCutoffed();
+		}
+
+		@Override
+		public MapTile next() {
+			algo.recalculateOpenListPriority();
+			return algo.search();
+		}
+
+		@Override
+		public void remove() {
+			// It's lazy generated, nothing to remove
+		}
+		
+	}
+	
+	class FValueComparator implements Comparator<MapTile> {
+		@Override
+		public int compare(MapTile o1, MapTile o2) {
+			return ((Integer) f(o1)).compareTo((Integer) f(o2));
+		}
+	}
 }

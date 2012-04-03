@@ -129,9 +129,12 @@ public class Ant implements Goal {
 		return maptile;
 	}
 
-	public void assignTargetIfBetter(Target target) {
-		if (isNewTargetIsBetter(target))
+	public boolean assignTargetIfBetter(Target target) {
+		if (isNewTargetIsBetter(target)){
 			assignTarget(target);
+			return true;
+		}
+		return false;
 	}
 	
 	public boolean hasAssignedTarget(){

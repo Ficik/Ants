@@ -1,6 +1,7 @@
 package mybot;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
@@ -69,10 +70,13 @@ public class Food extends Target implements Goal {
 	}
 
 	public void tryToAssignToClosestAnt() {
-		MapTile closest = AStar.antSearch(maptile);
-		System.err.println(this+" <-> "+closest);
-		if (MapTile.isValidTileWithAnt(closest))
-			closest.getAnt().assignTargetIfBetter(this);
+		Iterator<MapTile> closestIterator = AStar.antSearch(maptile);
+		while (closestIterator.hasNext()){
+			MapTile closest = closestIterator.next();
+			if (MapTile.isValidTileWithAnt(closest))
+				if (closest.getAnt().assignTargetIfBetter(this))
+					break;
+		}
 	}
 
 	@Override

@@ -70,12 +70,17 @@ public class Food extends Target implements Goal {
 	}
 
 	public void tryToAssignToClosestAnt() {
+		GameState.log("Assigning "+this);
 		Iterator<MapTile> closestIterator = AStar.antSearch(maptile);
 		while (closestIterator.hasNext()){
 			MapTile closest = closestIterator.next();
+			GameState.log("- Found "+closest);
 			if (MapTile.isValidTileWithAnt(closest))
-				if (closest.getAnt().assignTargetIfBetter(this))
+				if (closest.getAnt().assignTargetIfBetter(this)){
+					GameState.log("success");
 					break;
+				}
+			GameState.log("fail");
 		}
 	}
 

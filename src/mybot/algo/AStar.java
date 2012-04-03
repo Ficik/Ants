@@ -1,6 +1,5 @@
 package mybot.algo;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -10,16 +9,17 @@ import java.util.PriorityQueue;
 import java.util.Set;
 import mybot.Ant;
 import mybot.GameState;
+import mybot.Map;
 import mybot.MapTile;
 
 public class AStar {
 
 	
-	private static final int DISTANCE_CUTOFF = 10;
+	private static final int DISTANCE_CUTOFF = 15;
 	private Set<MapTile> closedSet = new HashSet<MapTile>();
 	private MapTile start;
 	private List<? extends Goal> goals;
-	private List<MapTile> closedTiles = new ArrayList<MapTile>();
+	private Set<MapTile> closedGoalTiles = new HashSet<MapTile>();
 	private PriorityQueue<MapTile> openSet = new PriorityQueue<MapTile>(80,new FValueComparator());
 	private boolean cutoffFlag = false;
 	
@@ -31,6 +31,11 @@ public class AStar {
 	private AStar(MapTile start, List<? extends Goal> goals) {
 		this.start = start;
 		this.goals = goals;
+		for (Goal goal : goals){
+			if (h(start, goal.getMapTile()) > DISTANCE_CUTOFF){
+				closedGoalTiles.add(goal.getMapTile());
+			}
+		}
 		openSet.add(start);
 	}
 
@@ -59,7 +64,7 @@ public class AStar {
 				MapTile processed = openSet.poll();
 				closedSet.add(processed);
 				if (checkIfGoal(processed)){
-					closedTiles.add(processed);
+					closedGoalTiles.add(processed);
 					return processed;
 				}
 				int curDistance = processed.getRealDistance(start);
@@ -100,7 +105,7 @@ public class AStar {
 		int dist = pos.getRealDistance(goal);
 		if (dist != MapTile.UNSET)
 			return dist;
-		return GameState.getCore().getDistance(pos, goal);
+		return Map.getManhattanDistance(pos, goal);
 	}
 	
 	private int minH(MapTile pos){
@@ -108,18 +113,18 @@ public class AStar {
 		Iterator<? extends Goal> iterator = goals.iterator();
 		while(iterator.hasNext()){
 			MapTile goal = iterator.next().getMapTile();
-			if (closedTiles.contains(goal)) continue;
+			if (closedGoalTiles.contains(goal)) continue;
 			best = Math.min(h(pos, goal), best);
 		}
 		return best;
 	}
 	
 	
-	public boolean isCutoffed() {
+	private boolean isCutoffed() {
 		return cutoffFlag;
 	}
 	
-	class AStarIterator implements Iterator<MapTile> {
+	private class AStarIterator implements Iterator<MapTile> {
 
 		private AStar algo;
 		
@@ -129,7 +134,7 @@ public class AStar {
 		
 		@Override
 		public boolean hasNext() {
-			return (goals.size()-closedTiles.size()) > 0 && !algo.isCutoffed();
+			return !openSet.isEmpty() && (goals.size()-closedGoalTiles.size()) > 0 && !algo.isCutoffed();
 		}
 
 		@Override
@@ -145,7 +150,7 @@ public class AStar {
 		
 	}
 	
-	class FValueComparator implements Comparator<MapTile> {
+	private class FValueComparator implements Comparator<MapTile> {
 		@Override
 		public int compare(MapTile o1, MapTile o2) {
 			return ((Integer) f(o1)).compareTo((Integer) f(o2));

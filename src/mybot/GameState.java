@@ -1,8 +1,6 @@
 package mybot;
 import core.Ants;
 
-
-
 public class GameState {
 
 	private static GameState instance;
@@ -36,6 +34,14 @@ public class GameState {
 	
 	public static Ants getCore() {
 		return GameState.core;
+	}
+	
+	public static GameLogger getLogger() {
+		return getInstance().logger;
+	}
+	
+	public static void log(String message){
+		getInstance().logger.log(message);
 	}
 	
 	/* ************************ */

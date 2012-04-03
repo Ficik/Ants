@@ -65,7 +65,6 @@ public class Ant implements Goal {
 
 	private void scheduleMoveToTarget(){
 		scheduledMoves = maptile.getPassableNeighbours();
-		System.err.println("Scheduled moves "+scheduledMoves);
 		Collections.sort(scheduledMoves, new Comparator<MapTile>() {
 			@Override
 			public int compare(MapTile o1, MapTile o2) {
@@ -157,7 +156,7 @@ public class Ant implements Goal {
 	
 	@Override
 	public String toString() {
-		return "Ant at "+maptile+": Target: "+assignedTarget ;
+		return "Ant at "+maptile+": Target: "+assignedTarget+" ["+(hasAssignedTarget()?"exists":"dont exists")+"]" ;
 	}
 	
 }

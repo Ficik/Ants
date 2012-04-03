@@ -27,13 +27,21 @@ public class GameLogger {
 	}
 	
 	public String getRoundHeader(){
-		return "===== Round #"+GameState.getRound()+" =====\n";
+		return "========= Round #"+GameState.getRound()+" =========\n";
 	}
 
 	public void logRoundChanges() {
 		logger.info(getRoundChanges());
 		logAnts();
-		logMap();
+		logFood();
+	}
+	
+	public void logFood(){
+		String log = "";
+		for (Food food : Food.getFood()){
+			log+=food+"\n";
+		}
+		logger.info("Food status:\n"+log);
 	}
 	
 	public void logAnts(){
@@ -58,6 +66,10 @@ public class GameLogger {
 		} catch (Exception e) {
 			logger.severe("Logging to file not started: "+e.getMessage());
 		}
+	}
+
+	public void log(String message) {
+		logger.log(Level.INFO, message);
 	}
 
 }

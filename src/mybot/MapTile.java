@@ -171,4 +171,7 @@ public class MapTile extends Tile {
 	public Tile createTile(){
 		return new Tile(getRow(),getCol());
 	}
+	
+	
+    
 }

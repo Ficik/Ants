@@ -40,6 +40,8 @@ public class MyBot extends Bot {
 		Food.tryAssignFood();
 		Ant.scheduleMoves();
 		Ant.performMoves();
+		
+		GameState.getLogger().logMap();
 	}
 	
 	/* *********** *

@@ -1,0 +1,9 @@
+.*
+!.gitignore
+*~
+dist/*
+!dist/empty
+log/*
+!log/empty
+bin/*
+!bin/empty

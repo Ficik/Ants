@@ -15,7 +15,7 @@ public class Food extends Target implements Goal {
 	private static List<Food> food = new ArrayList<Food>();
 
 	public static void addFood(int row, int col) {
-		if(!GameState.getMap().getTile(row, col).containFood())
+		if (!GameState.getMap().getTile(row, col).containFood())
 			new Food(row, col);
 	}
 
@@ -28,7 +28,7 @@ public class Food extends Target implements Goal {
 		for (Food the_food : food)
 			if (!the_food.exists())
 				markedToRemove.add(the_food);
-		while(!markedToRemove.isEmpty())
+		while (!markedToRemove.isEmpty())
 			markedToRemove.poll().destroy();
 	}
 
@@ -65,18 +65,17 @@ public class Food extends Target implements Goal {
 	}
 
 	public boolean exists() {
-		return !maptile.isVisible()
-				|| GameState.getCore().getFoodTiles().contains(maptile.createTile());
+		return !maptile.isVisible() || GameState.getCore().getFoodTiles().contains(maptile.createTile());
 	}
 
 	public void tryToAssignToClosestAnt() {
-		GameState.log("Assigning "+this);
+		GameState.log("Assigning " + this);
 		Iterator<MapTile> closestIterator = AStar.antSearch(maptile);
-		while (closestIterator.hasNext()){
+		while (closestIterator.hasNext()) {
 			MapTile closest = closestIterator.next();
-			GameState.log("- Found "+closest);
+			GameState.log("- Found " + closest);
 			if (MapTile.isValidTileWithAnt(closest))
-				if (closest.getAnt().assignTargetIfBetter(this)){
+				if (closest.getAnt().assignTargetIfBetter(this)) {
 					GameState.log("success");
 					break;
 				}
@@ -86,6 +85,6 @@ public class Food extends Target implements Goal {
 
 	@Override
 	public String toString() {
-		return (isAssigned()?"Assigned ":"")+"Food at "+maptile;
+		return (isAssigned() ? "Assigned " : "") + "Food at " + maptile;
 	}
 }

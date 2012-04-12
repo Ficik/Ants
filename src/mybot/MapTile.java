@@ -17,7 +17,7 @@ public class MapTile extends Tile {
 
 	private HashMap<MapTile, Integer> realDistances = new HashMap<MapTile, Integer>();
 	private float potential = 1;
-	
+
 	private Ant ant;
 	private Food food;
 
@@ -95,24 +95,22 @@ public class MapTile extends Tile {
 	public boolean isOccupied() {
 		return ant != null;
 	}
-	
-	
-	public boolean containFood(){
+
+	public boolean containFood() {
 		return food != null;
 	}
-	
+
 	public void setFood(Food food) {
 		this.food = food;
 	}
-	
+
 	public void unsetFood() {
 		setFood(null);
 	}
-	
+
 	public Food getFood() {
 		return food;
 	}
-	
 
 	public float getPotential() {
 		return potential;
@@ -136,11 +134,12 @@ public class MapTile extends Tile {
 	}
 
 	public int getRealDistance(MapTile start) {
-		if (start.equals(this)) return 0;
+		if (start.equals(this))
+			return 0;
 		Integer distance = realDistances.get(start);
 		if (distance == null)
 			distance = start.realDistances.get(this);
-		if (distance == null) 
+		if (distance == null)
 			return UNSET;
 		return distance.intValue();
 	}
@@ -149,29 +148,33 @@ public class MapTile extends Tile {
 		realDistances.put(destination, distance);
 	}
 
-	
-	public static boolean isValidTileWithAnt(MapTile maptile){
+	public static boolean isValidTileWithAnt(MapTile maptile) {
 		return maptile != null && maptile.getAnt() != null;
 	}
-	
-	public String getValueCode(){
-		if (containFood()) 			return "f";
-		if (isOccupied()) 			return "a";
-		if (value == Ilk.WATER) 	return "x";
-		if (value == Ilk.LAND)		return " ";
+
+	public String getValueCode() {
+		if (containFood())
+			return "f";
+		if (isOccupied())
+			return "a";
+		if (value == Ilk.WATER)
+			return "x";
+		if (value == Ilk.LAND)
+			return " ";
 		return "#";
 	}
-	
+
 	@Override
 	public String toString() {
-		return "Tile ["+getRow()+", "+getCol()+"]";
+		return "Tile [" + getRow() + ", " + getCol() + "]";
 	}
-	
-	
-	public Tile createTile(){
-		return new Tile(getRow(),getCol());
+
+	public Tile createTile() {
+		return new Tile(getRow(), getCol());
 	}
-	
-	
-    
+
+	public Aim getAimTo(MapTile tile) {
+		return GameState.getCore().getDirections(this, tile).get(0);
+	}
+
 }

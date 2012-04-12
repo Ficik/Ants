@@ -6,28 +6,26 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
-
-
 public class GameLogger {
 
 	private final static String LOGGER_NAME = "Ants";
 	private final static String LOG_DIR = "../log";
 	private Logger logger;
-	
+
 	public GameLogger() {
 		logger = Logger.getLogger(LOGGER_NAME);
 		startLoggingToFile();
 		logger.setLevel(Level.ALL);
 	}
-	
-	public String getRoundChanges(){
+
+	public String getRoundChanges() {
 		String log = getRoundHeader();
-		log += "Ants: "+Ant.getAnts().size()+" Food: "+Food.getFood().size();
+		log += "Ants: " + Ant.getAnts().size() + " Food: " + Food.getFood().size();
 		return log;
 	}
-	
-	public String getRoundHeader(){
-		return "========= Round #"+GameState.getRound()+" =========\n";
+
+	public String getRoundHeader() {
+		return "========= Round #" + GameState.getRound() + " =========\n";
 	}
 
 	public void logRoundChanges() {
@@ -35,36 +33,36 @@ public class GameLogger {
 		logAnts();
 		logFood();
 	}
-	
-	public void logFood(){
+
+	public void logFood() {
 		String log = "";
-		for (Food food : Food.getFood()){
-			log+=food+"\n";
+		for (Food food : Food.getFood()) {
+			log += food + "\n";
 		}
-		logger.info("Food status:\n"+log);
+		logger.info("Food status:\n" + log);
 	}
-	
-	public void logAnts(){
+
+	public void logAnts() {
 		String log = "";
-		for (Ant ant : Ant.getAnts()){
-			log+=ant+"\n";
+		for (Ant ant : Ant.getAnts()) {
+			log += ant + "\n";
 		}
-		logger.info("Ants status:\n"+log);
+		logger.info("Ants status:\n" + log);
 	}
-	
-	public void logMap(){
-		logger.info("Map:\n"+GameState.getMap().toString()+"\n");
+
+	public void logMap() {
+		logger.info("Map:\n" + GameState.getMap().toString() + "\n");
 	}
-	
-	public void startLoggingToFile(){
+
+	public void startLoggingToFile() {
 		try {
-			Handler handler = new FileHandler(LOG_DIR+"/Ants.log", false);
+			Handler handler = new FileHandler(LOG_DIR + "/Ants.log", false);
 			handler.setFormatter(new SimpleFormatter());
 			logger.setUseParentHandlers(false);
 			logger.addHandler(handler);
-			
+
 		} catch (Exception e) {
-			logger.severe("Logging to file not started: "+e.getMessage());
+			logger.severe("Logging to file not started: " + e.getMessage());
 		}
 	}
 

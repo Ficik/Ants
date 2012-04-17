@@ -55,7 +55,7 @@ public class Map {
 		for (int row = 0; row < rows; row++) {
 			string += (row % 10) + " ";
 			for (int col = 0; col < cols; col++)
-				string += getTile(row, col).getValueCode();
+				string += getTile(row, col).getUnseenDuration();
 			string += "\n";
 		}
 		return string;

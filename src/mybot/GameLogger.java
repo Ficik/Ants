@@ -51,7 +51,7 @@ public class GameLogger {
 	}
 
 	public void logMap() {
-		logger.info("Map:\n" + GameState.getMap().toString() + "\n");
+		//logger.info("Map:\n" + GameState.getMap().toString() + "\n");
 	}
 
 	public void startLoggingToFile() {

@@ -15,7 +15,7 @@ public class DCOP {
 
 	private static DCOP instance;
 
-	private int viewRadius, viewRadiusSquared;
+	private static int viewRadius, viewRadiusSquared;
 	private static HashMap<Aim, List<int[]>> viewDiff;
 
 	public static DCOP getInstance() {
@@ -45,8 +45,8 @@ public class DCOP {
 	}
 
 	public static void initGameSpecificVariables() {
-		getInstance().viewRadiusSquared = GameState.getCore().getAttackRadius2();
-		getInstance().viewRadius = (int) Math.sqrt(getInstance().viewRadiusSquared);
+		viewRadiusSquared = GameState.getCore().getViewRadius2();
+		viewRadius = (int) Math.ceil(Math.sqrt(viewRadiusSquared));
 		getInstance().generateViewDifferenceMap();
 	}
 
@@ -59,7 +59,7 @@ public class DCOP {
 	private void generateViewDifferenceMap() {
 		initialsViewDifferenceMap();
 		for (int col = -viewRadius - 1; col <= viewRadius + 1; col++)
-			for (int row = -viewRadius - 1; row < viewRadius + 1; row++)
+			for (int row = -viewRadius - 1; row <= viewRadius + 1; row++)
 				if (!isVectorInViewRadius(row, col))
 					for (Aim aim : Aim.values())
 						addPointToViewDifferenceMapIfInViewRadius(aim, row + aim.getRowDelta(), col + aim.getColDelta());
@@ -92,7 +92,7 @@ public class DCOP {
 		}
 
 		private Integer getValue(MapTile tile) {
-			return (Integer) getMoveExploringValue(origin, origin.getAimTo(tile));
+			return (Integer)(int)getMoveExploringValue(origin, origin.getAimTo(tile));
 		}
 
 	}

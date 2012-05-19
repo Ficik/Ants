@@ -2,6 +2,8 @@ package mybot;
 
 import java.util.TreeMap;
 
+import mybot.algo.SimpleCombat;
+
 import core.Tile;
 
 public class Map {
@@ -48,17 +50,17 @@ public class Map {
 	@Override
 	public String toString() {
 
-		String string = "  ";
+		StringBuilder sb = new StringBuilder();
 		for (int col = 0; col < cols; col++)
-			string += (col % 10) + "";
-		string += "\n";
+			sb.append((col % 10) + "");
+		sb.append("\n");
 		for (int row = 0; row < rows; row++) {
-			string += (row % 10) + " ";
+			sb.append((row % 10) + " ");
 			for (int col = 0; col < cols; col++)
-				string += getTile(row, col).getUnseenDuration();
-			string += "\n";
+				sb.append(SimpleCombat.instance.getTotalInfluence(getTile(row, col)) - SimpleCombat.instance.getInfluence((Integer)0, getTile(row, col)));
+			sb.append("\n");
 		}
-		return string;
+		return sb.toString();
 	}
 
 }

@@ -1,12 +1,19 @@
 import java.io.IOException;
+import java.util.Iterator;
+
 import mybot.Ant;
 import mybot.Food;
 import mybot.GameState;
+import mybot.Hill;
 import mybot.Map;
+import mybot.MapTile;
+import mybot.algo.AStar;
 import mybot.algo.DCOP;
 import mybot.algo.PotentialFields;
+import mybot.algo.SimpleCombat;
 import core.Bot;
 import core.Ilk;
+import core.Tile;
 
 /**
  * Starter bot implementation.
@@ -33,18 +40,25 @@ public class MyBot extends Bot {
 
 		GameState.getInstance().prepareNewRound();
 
-		/*
-		 * for (Tile hill : getAnts().getEnemyHills()){ MapTile closest =
-		 * AStar.antSearch(GameState.getMap().getTile(hill.getRow(),
-		 * hill.getCol())); if (isValidTileWithAnt(closest))
-		 * closest.getAnt().assignHill(hill); }
-		 */
+		for (Hill hill : Hill.all) {
+			Iterator<MapTile> it = AStar.antSearch(hill.getMapTile());
+			while(it.hasNext()){
+				MapTile closest = it.next();
+				if (closest == null)
+					continue;
+				Ant ant = closest.getAnt();
+				if (ant != null)
+					ant.assignTargetIfBetter(hill);
+			}
+		}
+
 		Food.checkAndRemoveLostFood();
 		Food.tryAssignFood();
 		Ant.scheduleMoves();
 		Ant.performMoves();
 
 		GameState.getLogger().logMap();
+		SimpleCombat.instance.closeTurn();
 	}
 
 	/* *********** *
@@ -59,6 +73,8 @@ public class MyBot extends Bot {
 
 	@Override
 	public void addAnt(int row, int col, int owner) {
+		// System.err.println(owner+": "+row+" "+col);
+		SimpleCombat.instance.addAnt(owner, row, col);
 		if (owner == MY_BOT)
 			Ant.addAnt(row, col);
 		super.addAnt(row, col, owner);
@@ -75,5 +91,12 @@ public class MyBot extends Bot {
 	public void addWater(int row, int col) {
 		GameState.getMap().getTile(row, col).setValue(Ilk.WATER);
 		PotentialFields.generatePotentialFromTile(row, col);
+	}
+	
+	@Override
+	public void addHill(int row, int col, int owner) {
+		if (owner != MY_BOT)
+			Hill.addHill(GameState.getMap().getTile(row, col));
+		super.addHill(row, col, owner);
 	}
 }

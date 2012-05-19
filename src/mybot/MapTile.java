@@ -1,6 +1,7 @@
 package mybot;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -18,6 +19,8 @@ public class MapTile extends Tile {
 	private HashMap<MapTile, Integer> realDistances = new HashMap<MapTile, Integer>();
 	private float potential = 1;
 
+	private int credibility = 0;
+	
 	private Ant ant;
 	private Food food;
 
@@ -62,6 +65,16 @@ public class MapTile extends Tile {
 		for (Aim direction : Aim.values()) {
 			MapTile tile = getNeighbour(direction);
 			if (tile.isPassable())
+				tiles.add(tile);
+		}
+		return tiles;
+	}
+	
+	public List<MapTile> getPassableAndUnknownNeighbours() {
+		ArrayList<MapTile> tiles = new ArrayList<MapTile>();
+		for (Aim direction : Aim.values()) {
+			MapTile tile = getNeighbour(direction);
+			if (tile.value != Ilk.WATER)
 				tiles.add(tile);
 		}
 		return tiles;
@@ -151,6 +164,34 @@ public class MapTile extends Tile {
 	public static boolean isValidTileWithAnt(MapTile maptile) {
 		return maptile != null && maptile.getAnt() != null;
 	}
+	
+	/**
+	 * Environmental and total credibility difference
+	 * @return
+	 */
+	public float getCurrentDifference(){
+		return getEnvironmentalRequirement() - (float)getTotalCredibility();
+	}
+	
+	/**
+	 * Environmental requirement informs about how much is this
+	 * maptile needed to update
+	 * @return float from 0 to 1
+	 */
+	public float getEnvironmentalRequirement(){
+		//System.err.println(getUnseenDuration()+" / "+GameState.getRound()+" = "+(float)getUnseenDuration()/(float)GameState.getRound());
+		return (value == Ilk.WATER?0f:((float)getUnseenDuration())/GameState.getRound());
+		//return (value == Ilk.WATER?0f:(1-getPotential()))*((getUnseenDuration()/GameState.getRound()));
+	}
+	
+	
+	public void changeCredibility(int amount){
+		credibility+=amount;
+	}
+	
+	public int getTotalCredibility(){
+		return credibility;
+	}
 
 	public String getValueCode() {
 		if (containFood())
@@ -176,5 +217,7 @@ public class MapTile extends Tile {
 	public Aim getAimTo(MapTile tile) {
 		return GameState.getCore().getDirections(this, tile).get(0);
 	}
+
+
 
 }

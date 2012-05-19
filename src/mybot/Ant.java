@@ -7,6 +7,7 @@ import java.util.List;
 
 import mybot.algo.DCOP;
 import mybot.algo.Goal;
+import mybot.algo.SimpleCombat;
 import core.Aim;
 
 public class Ant implements Goal {
@@ -23,6 +24,7 @@ public class Ant implements Goal {
 	public static void removeAnt(int row, int col) {
 		Ant ant = GameState.getMap().getTile(row, col).getAnt();
 		if (ant != null) {
+			ant.changeCredibility(-1);
 			ants.remove(ant);
 			ant.unsetPosition();
 		}
@@ -53,8 +55,15 @@ public class Ant implements Goal {
 	private Ant(int row, int col) {
 		setPosition(row, col);
 		ants.add(this);
+		changeCredibility(1);
 	}
 
+	
+	public void changeCredibility(int amount){
+		for (MapTile tile : DCOP.getCurrentlyVisibleMapTilesByAntAtMapTile(maptile))
+			tile.changeCredibility(amount);
+	}
+	
 	public void scheduleMove() {
 		scheduledMoves.clear();
 		if (hasAssignedTarget())
@@ -80,14 +89,21 @@ public class Ant implements Goal {
 	}
 
 	private void scheduleMoveToDiscover() {
-		scheduledMoves = DCOP.getNeighbourMapTilesOrderedByExploringValue(maptile);
+		//System.err.println("Discovering by "+this);
+		List<MapTile> possibleMoves = maptile.getPassableNeighbours();
+		possibleMoves.add(0, maptile);
+		scheduledMoves.clear();
+		scheduledMoves.add(DCOP.selectPosition(possibleMoves));
+		//scheduledMoves = DCOP.getNeighbourMapTilesOrderedByExploringValue(maptile);
 	}
 
 	public void performScheduledMove() {
+		changeCredibility(-1);
 		for (MapTile tile : scheduledMoves) {
 			if (tryMoveToMapTile(tile))
 				break;
 		}
+		changeCredibility(1);
 	}
 
 	private void unsetPosition() {
@@ -112,7 +128,7 @@ public class Ant implements Goal {
 	}
 
 	public boolean tryMoveToMapTile(MapTile maptile) {
-		if (maptile == null || maptile.isOccupied())
+		if (maptile == null || maptile.isOccupied() || !SimpleCombat.instance.isSafe(maptile))
 			return false;
 		issueMoveOrder(maptile);
 		setPosition(maptile);

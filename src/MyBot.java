@@ -9,11 +9,11 @@ import mybot.Map;
 import mybot.MapTile;
 import mybot.algo.AStar;
 import mybot.algo.DCOP;
+import mybot.algo.DCOP_MST;
 import mybot.algo.PotentialFields;
 import mybot.algo.SimpleCombat;
 import core.Bot;
 import core.Ilk;
-import core.Tile;
 
 /**
  * Starter bot implementation.
@@ -39,7 +39,10 @@ public class MyBot extends Bot {
 			prepare();
 
 		GameState.getInstance().prepareNewRound();
-
+		DCOP_MST.init();
+		DCOP_MST.loop();
+//		System.err.println(DCOP_MST.positions);
+		
 		for (Hill hill : Hill.all) {
 			Iterator<MapTile> it = AStar.antSearch(hill.getMapTile());
 			while(it.hasNext()){
@@ -52,6 +55,8 @@ public class MyBot extends Bot {
 			}
 		}
 
+		
+		
 		Food.checkAndRemoveLostFood();
 		Food.tryAssignFood();
 		Ant.scheduleMoves();
@@ -61,9 +66,9 @@ public class MyBot extends Bot {
 		SimpleCombat.instance.closeTurn();
 	}
 
-	/* *********** *
-	 * LISTENERS * ***********
-	 */
+	/* ***********
+	 * LISTENERS * 
+	 * ***********/
 
 	@Override
 	public void addFood(int row, int col) {
@@ -73,7 +78,6 @@ public class MyBot extends Bot {
 
 	@Override
 	public void addAnt(int row, int col, int owner) {
-		// System.err.println(owner+": "+row+" "+col);
 		SimpleCombat.instance.addAnt(owner, row, col);
 		if (owner == MY_BOT)
 			Ant.addAnt(row, col);

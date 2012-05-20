@@ -6,6 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import mybot.algo.DCOP;
+import mybot.algo.DCOP_MST;
 import mybot.algo.Goal;
 import mybot.algo.SimpleCombat;
 import core.Aim;
@@ -90,10 +91,11 @@ public class Ant implements Goal {
 
 	private void scheduleMoveToDiscover() {
 		//System.err.println("Discovering by "+this);
-		List<MapTile> possibleMoves = maptile.getPassableNeighbours();
-		possibleMoves.add(0, maptile);
+		//List<MapTile> possibleMoves = maptile.getPassableNeighbours();
+		//possibleMoves.add(0, maptile);
 		scheduledMoves.clear();
-		scheduledMoves.add(DCOP.selectPosition(possibleMoves));
+		scheduledMoves.add(DCOP_MST.positions.get(this));
+		//scheduledMoves.add(DCOP.selectPosition(possibleMoves));
 		//scheduledMoves = DCOP.getNeighbourMapTilesOrderedByExploringValue(maptile);
 	}
 

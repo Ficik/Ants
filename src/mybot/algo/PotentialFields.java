@@ -42,4 +42,19 @@ public class PotentialFields {
 	private static void decreasePotential(int row, int col, float amount) {
 		GameState.getMap().getTile(row, col).decreasePotential(amount);
 	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
 }

@@ -19,6 +19,8 @@ public class MapTile extends Tile {
 	private HashMap<MapTile, Integer> realDistances = new HashMap<MapTile, Integer>();
 	private float potential = 1;
 
+	public List<MapTile> SR;
+	public List<MapTile> AR;
 	private int credibility = 0;
 	
 	private Ant ant;
@@ -180,7 +182,7 @@ public class MapTile extends Tile {
 	 */
 	public float getEnvironmentalRequirement(){
 		//System.err.println(getUnseenDuration()+" / "+GameState.getRound()+" = "+(float)getUnseenDuration()/(float)GameState.getRound());
-		return (value == Ilk.WATER?0f:((float)getUnseenDuration())/GameState.getRound());
+		return (value == Ilk.WATER?0f:(Math.min(getUnseenDuration(), 10)/10f));
 		//return (value == Ilk.WATER?0f:(1-getPotential()))*((getUnseenDuration()/GameState.getRound()));
 	}
 	

@@ -22,4 +22,13 @@ public class Hill extends Target {
 		return tile;
 	}
 
+	boolean exists = true;
+	
+	@Override
+	public boolean targetExists() {
+		if (tile.getAnt() != null)
+			exists = false;
+		return exists;//super.targetExists();
+	}
+	
 }

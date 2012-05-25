@@ -1,5 +1,6 @@
 package mybot.algo.dcop;
 
+import core.Tile;
 import mybot.GameState;
 import mybot.MapTile;
 
@@ -24,11 +25,16 @@ public class Point {
 	
 	@Override
 	public boolean equals(Object obj) {
-		return tile.equals(obj);
+		return tile.equals(((Point)obj).tile);
 	}
 	
 	@Override
 	public int hashCode() {
 		return tile.hashCode();
+	}
+	
+	@Override
+	public String toString() {
+		return "[Point "+tile.toString()+", "+getValue()+"]";
 	}
 }

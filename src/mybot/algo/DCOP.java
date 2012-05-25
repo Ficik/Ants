@@ -93,18 +93,6 @@ public class DCOP {
 		if (selectedPosition == null)
 			selectedPosition = possiblePositons.get(new Random().nextInt(possiblePositons.size()));
 
-		// target set <- points within SRself from some pos in pos set with largest
-		// func value (must be larger than zero)
-		// if (target set is empty)
-		// return some pos 2 pos set
-		// if (no pos 2 pos set is within SRself from all the points in target set)
-		// target set largest subset of target set within SRself from some pos 2 pos
-		// set
-		// possible pos all positions in pos set which are within SRself from all
-		// points in target set
-		// intersect area area within SRself from all pos 2 possible pos
-		// new func func n func:intersect area
-		// return select pos(possible pos , new func)
 		return selectedPosition;
 	}
 

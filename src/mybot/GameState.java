@@ -8,7 +8,7 @@ public class GameState {
 	private static int round = 0;
 	private static Map map;
 	private static Ants core;
-	private boolean logging = true;
+	private boolean logging = false;
 	private GameLogger logger = new GameLogger();
 
 	/* ********************** */

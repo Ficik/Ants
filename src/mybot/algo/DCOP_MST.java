@@ -2,7 +2,9 @@ package mybot.algo;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import mybot.Ant;
 import mybot.GameState;
@@ -52,14 +54,25 @@ public class DCOP_MST {
 
 	public static void loop(){
 		boolean stable = false;
-		
+		List<Ant> changes = new ArrayList<Ant>();
+		changes.addAll(Ant.getAnts());
+		System.err.println("DCOP START");
+		Diff.counter=0;
 		while (!stable){
 			stable = true;
 			for (Ant ant : Ant.getAnts()){
 				localReduction.put(ant, bestPossibleLocalReduction(ant));
 			}
+			changes.clear();
 			for (Ant ant : Ant.getAnts()){
+				System.err.println("REDUCTION "+localReduction.get(ant).value);
+				System.err.println("BY "+positions.get(ant)+" --> "+localReduction.get(ant).position);
+				
 				if (localReduction.get(ant).value > 0){
+					if(localReduction.get(ant).position.equals(positions.get(ant))){
+						System.err.println("WTF?");
+						continue;
+					}
 					LR lr = localReduction.get(ant);
 					double max = 0;
 					List<Ant> neighs = neighbors.get(ant);
@@ -71,19 +84,24 @@ public class DCOP_MST {
 						cur_diff.changeValueBy(cur_diff.getPointWithinSR(positions.get(ant)), 1);
 						positions.put(ant, lr.position);
 						cur_diff.changeValueBy(cur_diff.getPointWithinSR(positions.get(ant)), -1);
+						//changes.addAll(neighbors.get(ant));
 						stable = false;
 					}
 				}
+				
 			}
 		}
+		System.err.println("NUMBER of diff ops: "+Diff.counter);
 	}
 	
 	private static LR bestPossibleLocalReduction(Ant ant) {
 		List<MapTile> possiblePositions = ant.getMapTile().getPassableNeighbours();
 		possiblePositions.add(ant.getMapTile());
 		Diff tempDiff = new Diff(cur_diff);
-		tempDiff.changeValueBy((tempDiff.getPointWithinSR(positions.get(ant))),1);
-		MapTile newPosition = selectPosition(possiblePositions, new Diff(tempDiff), ant);
+		tempDiff.changeValueBy((tempDiff.getPointWithinSR(positions.get(ant))),1); // zrusim vlastni pokryti
+		MapTile newPosition = selectPositionFast(possiblePositions, new Diff(tempDiff), ant);
+		
+		System.err.println("Moving"+positions.get(ant)+" -> "+newPosition);
 		
 		List<Point> curCoverage = tempDiff.getPointWithinSR(positions.get(ant));
 		List<Point> newCoverage = tempDiff.getPointWithinSR(newPosition);
@@ -97,17 +115,18 @@ public class DCOP_MST {
 			if (!curCoverage.contains(point))
 				curCov+=point.getValue();
 		}
-		return new LR(newPosition, curCov - newCov);
+		//System.err.println(curCov - newCov);
+		return new LR(newPosition, + curCov - newCov);
 	}
 	
-	private static MapTile selectPosition(List<MapTile> possiblePositions, Diff func, Ant ant){
-		float best = 0;
+	
+	private static MapTile selectPositionFast(List<MapTile> possiblePositions, Diff func, Ant ant){
+		float best = -9999f;
 		MapTile bestTile = positions.get(ant);
 		for (MapTile pos: possiblePositions) {
 			float sum = 0;
 			for (Point point: func.getPointWithinSR(pos))
-				if (point.getValue() > 0)
-					sum+=point.getValue();
+				sum+=point.getValue();
 			if (sum > best){
 				best = sum;
 				bestTile = pos;
@@ -115,18 +134,27 @@ public class DCOP_MST {
 		}
 		return bestTile;
 	}
+	/*private static MapTile selectPosition(List<MapTile> possiblePositions, Diff func, Ant ant){
+		
+		for (MapTile pos: possiblePositions) {
+			float sum = 0;
+			for (Point point: func.getPointWithinSR(pos))
+				if (point.getValue() > 0)
+		}
+		return bestTile;
+	}*/
 
-/*	private static MapTile selectPosition(List<MapTile> possiblePositions, Diff func, Ant ant) {
-		System.err.println(possiblePositions);
+	private static MapTile selectPosition(List<MapTile> possiblePositions, Diff func, Ant ant) {
 		if (possiblePositions.size() == 0){
 			System.err.println("NONE");
 			return ant.getMapTile();
 		}
 		if (possiblePositions.size() == 1)
 			return possiblePositions.get(0);
+		// select points with highest positive value 
 		HashSet<Point> target_set =new HashSet<Point>();
 		double max_value = 0;
-		for (Point point : func.getPointWithinArea(positions.get(ant), Math.sqrt(GameState.getCore().getViewRadius2())+1)){
+		for (Point point : func.getPointWithinSR(positions.get(ant))){
 			double value = point.getValue();
 			if (value > 0){
 				if (value > max_value){
@@ -137,32 +165,57 @@ public class DCOP_MST {
 					target_set.add(point);
 			}
 		}
+		//System.err.println("TARGETSET"+target_set);
 		
 		if (target_set.isEmpty()){
 			return possiblePositions.get(0);
 		}
+		
+		// Positions that covers largest subset of target_set
 		max_value = 0;
 		List<MapTile> new_possible_positions = new ArrayList<MapTile>();
-		List<Point> intersection = new ArrayList<Point>();
+		
+		// subsets for each position
+		HashMap<MapTile, HashSet<Point>> subsets = new HashMap<MapTile, HashSet<Point>>();
 		for (MapTile pos : possiblePositions){
-			List<Point> points = func.getPointWithinSR(pos);
-			int count = points.size();
-			if (count > max_value){
-				max_value = count;
-				new_possible_positions.clear();
-				intersection = points;
-			}
-			if (count == max_value){
-				int needed = (int)max_value;
-				for(Point point : points)
-					if (intersection.contains(point))
-						needed--;
-				if (needed == 0)
-					new_possible_positions.add(pos);
+			HashSet<Point> subset = new HashSet<Point>();
+			int value = 0;
+			for (Point point : func.getPointWithinSR(pos)){
+				if (target_set.contains(point)){
+					subset.add(point);
+					value+=1;
+					if (max_value < value)
+						max_value = value;
 				}
+			}
+			subsets.put(pos, subset);
 		}
+		//System.err.println("SUBSETS: "+subsets);
+		
+		Set<Point> intersection = null;
+		for (MapTile pos : possiblePositions){
+			HashSet<Point> subset = subsets.get(pos);
+			if (subset.size() < max_value)
+				continue;
+			if (intersection == null){
+				intersection = subset;
+				new_possible_positions.add(pos);
+			} else {
+				boolean isSame=true;
+				for (Point point : subset){
+					if (!intersection.contains(point)){
+						isSame = false;
+						break;
+					}
+				}
+				if (isSame)
+					new_possible_positions.add(pos);
+			}
+		}
+		
+		//System.err.println(func);
 		func.substract(intersection);
 		return selectPosition(new_possible_positions, func, ant);
-	}*/
+	}
 	
 }

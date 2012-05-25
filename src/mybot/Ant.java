@@ -8,8 +8,10 @@ import java.util.List;
 import mybot.algo.DCOP;
 import mybot.algo.DCOP_MST;
 import mybot.algo.Goal;
+import mybot.algo.PotentialFields;
 import mybot.algo.SimpleCombat;
 import core.Aim;
+import core.Ilk;
 
 public class Ant implements Goal {
 
@@ -46,9 +48,21 @@ public class Ant implements Goal {
 	public static List<Ant> getAnts() {
 		return ants;
 	}
+	
+	public static void removeDeadAnts(){
+		List<Ant> deads = new ArrayList<Ant>();
+		for (Ant ant : ants)
+			if (GameState.getCore().getIlk(ant.maptile) == Ilk.DEAD)
+				deads.add(ant);
+		for (Ant ant : deads)
+			removeAnt(ant.getMapTile().getRow(), ant.getMapTile().getCol());
+				
+	}
 
 	/* === Single ant specific part === */
 
+	private int lastMove = -1;
+	
 	private MapTile maptile = null;
 	private List<MapTile> scheduledMoves = new ArrayList<MapTile>();
 	private Target assignedTarget;
@@ -90,21 +104,27 @@ public class Ant implements Goal {
 	}
 
 	private void scheduleMoveToDiscover() {
-		//System.err.println("Discovering by "+this);
-		//List<MapTile> possibleMoves = maptile.getPassableNeighbours();
-		//possibleMoves.add(0, maptile);
-		scheduledMoves.clear();
+		List<MapTile> possibleMoves = maptile.getPassableNeighbours();
+		//scheduledMoves = maptile.getPassableNeighbours();
+		
+		//PotentialFields.instance.reorderMoves(scheduledMoves);
+		possibleMoves.add(0, maptile);
+		//scheduledMoves.clear();
 		scheduledMoves.add(DCOP_MST.positions.get(this));
 		//scheduledMoves.add(DCOP.selectPosition(possibleMoves));
 		//scheduledMoves = DCOP.getNeighbourMapTilesOrderedByExploringValue(maptile);
 	}
 
 	public void performScheduledMove() {
+		if (lastMove == GameState.getRound())
+			return;
+		lastMove = GameState.getRound();
 		changeCredibility(-1);
 		for (MapTile tile : scheduledMoves) {
 			if (tryMoveToMapTile(tile))
 				break;
 		}
+		
 		changeCredibility(1);
 	}
 
@@ -130,7 +150,11 @@ public class Ant implements Goal {
 	}
 
 	public boolean tryMoveToMapTile(MapTile maptile) {
-		if (maptile == null || maptile.isOccupied() || !SimpleCombat.instance.isSafe(maptile))
+		if (maptile == null || !SimpleCombat.getInstance().isSafe(maptile))
+			return false;
+		if (maptile.isOccupied())
+			maptile.getAnt().performScheduledMove();
+		if (maptile.isOccupied())
 			return false;
 		issueMoveOrder(maptile);
 		setPosition(maptile);

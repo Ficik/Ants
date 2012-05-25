@@ -1,5 +1,7 @@
 package core;
 
+import mybot.MapTile;
+
 /**
  * Represents a tile of the game map.
  */
@@ -61,7 +63,7 @@ public class Tile implements Comparable<Tile> {
 	@Override
 	public boolean equals(Object o) {
 		boolean result = false;
-		if (o instanceof Tile) {
+		if (o instanceof Tile || o instanceof MapTile) {
 			Tile tile = (Tile) o;
 			result = row == tile.row && col == tile.col;
 		}

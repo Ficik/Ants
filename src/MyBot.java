@@ -39,8 +39,7 @@ public class MyBot extends Bot {
 			prepare();
 
 		GameState.getInstance().prepareNewRound();
-		DCOP_MST.init();
-		DCOP_MST.loop();
+		Ant.removeDeadAnts();
 //		System.err.println(DCOP_MST.positions);
 		
 		for (Hill hill : Hill.all) {
@@ -54,16 +53,20 @@ public class MyBot extends Bot {
 					ant.assignTargetIfBetter(hill);
 			}
 		}
-
 		
 		
 		Food.checkAndRemoveLostFood();
 		Food.tryAssignFood();
+		
+		DCOP_MST.init();
+		DCOP_MST.loop();
+		
 		Ant.scheduleMoves();
 		Ant.performMoves();
-
+		
+		
 		GameState.getLogger().logMap();
-		SimpleCombat.instance.closeTurn();
+		SimpleCombat.getInstance().closeTurn();
 	}
 
 	/* ***********
@@ -78,7 +81,7 @@ public class MyBot extends Bot {
 
 	@Override
 	public void addAnt(int row, int col, int owner) {
-		SimpleCombat.instance.addAnt(owner, row, col);
+		SimpleCombat.getInstance().addAnt(owner, row, col);
 		if (owner == MY_BOT)
 			Ant.addAnt(row, col);
 		super.addAnt(row, col, owner);

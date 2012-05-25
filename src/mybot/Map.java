@@ -57,7 +57,7 @@ public class Map {
 		for (int row = 0; row < rows; row++) {
 			sb.append((row % 10) + " ");
 			for (int col = 0; col < cols; col++)
-				sb.append(SimpleCombat.instance.getTotalInfluence(getTile(row, col)) - SimpleCombat.instance.getInfluence((Integer)0, getTile(row, col)));
+				sb.append(getTile(row, col).getCurrentDifference());
 			sb.append("\n");
 		}
 		return sb.toString();
